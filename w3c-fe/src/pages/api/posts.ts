@@ -1,16 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { MESSAGE_TO_BE_SIGNED, W3CTOKEN_ADDRESS } from '@/constants'
-import { localChain } from '@/providers/RainbowKit'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import {
-    Address,
-    createPublicClient,
-    erc20Abi,
-    http,
-    verifyMessage,
-} from 'viem'
+import jwt from 'jsonwebtoken'
 
-type Post = {
+export type Post = {
     id: string
     title: string
     description: string
@@ -55,48 +47,29 @@ export default async function handler(
     res: NextApiResponse<Data>,
 ) {
     if (req.method === 'POST') {
-        const { address, signature } = JSON.parse(req.body)
+        const token = req.headers.authorization?.split(' ')[1]
 
-        console.log('p', req.body, address, signature)
-
-        if (!address || !signature) {
-            res.status(400).json({
+        if (!token) {
+            return res.status(401).json({
                 posts: [],
-                error: 'Missing address or signature',
+                error: 'Missing token',
             })
         }
 
-        const isSignedByAddress = await verifyMessage({
-            message: MESSAGE_TO_BE_SIGNED,
-            signature: signature,
-            address: address,
-        })
+        const decodedToken = jwt.verify(
+            token,
+            process.env.SECRET || '',
+        ) as jwt.JwtPayload
+        console.log('decodedToken', decodedToken)
 
-        if (!isSignedByAddress) {
+        const { address } = decodedToken
+
+        // const { signature } = JSON.parse(req.body)
+
+        if (!address) {
             res.status(400).json({
                 posts: [],
-                error: 'Invalid signature',
-            })
-        }
-
-        const publicClient = createPublicClient({
-            chain: localChain,
-            transport: http(),
-        })
-
-        const balanceOf = await publicClient.readContract({
-            abi: erc20Abi,
-            address: W3CTOKEN_ADDRESS,
-            functionName: 'balanceOf',
-            args: [address as Address],
-        })
-
-        console.log('balanceOf', balanceOf)
-
-        if (balanceOf === BigInt(0)) {
-            res.status(400).json({
-                posts: [],
-                error: 'No balance',
+                error: 'Missing address',
             })
         }
 

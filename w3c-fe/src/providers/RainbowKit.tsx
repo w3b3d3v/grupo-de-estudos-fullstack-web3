@@ -12,13 +12,13 @@ export const localChain = {
     id: 31337,
 }
 
-const config = getDefaultConfig({
+export const config = getDefaultConfig({
     appName: 'Web 3 Communties',
     chains: [base, arbitrum, localChain],
     projectId: 'ae835863ee28f9060bd789bb1f68f711',
 })
 
-const queryClient = new QueryClient()
+export const queryClient = new QueryClient()
 
 type RainbowKitProps = {
     children: React.ReactNode

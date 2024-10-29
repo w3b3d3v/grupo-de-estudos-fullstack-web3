@@ -18,7 +18,7 @@ contract Web3DevToken is ERC20 {
         require(balanceOf(msg.sender) > 0, "You are not invited");
         require(msg.sender != to, "You can't invite yourself");
         require(inviteCount[msg.sender] < MAX_INVITES, "You can't invite more than 3 people");
-        require(balanceOf(to) >= inviteAmount, "Address alreayd invited");
+        // require(balanceOf(to) > inviteAmount, "Address alreayd invited");
 
         _mint(to, inviteAmount);
         inviteCount[msg.sender]++;

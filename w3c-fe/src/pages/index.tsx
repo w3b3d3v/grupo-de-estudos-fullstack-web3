@@ -1,7 +1,11 @@
 import Head from 'next/head'
 
+import dynamic from 'next/dynamic'
 import CustomConnectButton from '@/components/CustomConnectButton'
-import MainPanel from '@/components/MainPanel'
+
+const MainPanel = dynamic(() => import('@/components/MainPanel'), {
+    ssr: false,
+})
 
 export default function Home() {
     return (

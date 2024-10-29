@@ -1,8 +1,9 @@
 import React from 'react'
-import { MESSAGE_TO_BE_SIGNED, W3CTOKEN_ADDRESS } from '@/constants'
-import { Address, erc20Abi, formatUnits, verifyMessage } from 'viem'
 
-import { useAccount, useReadContract, useSignMessage } from 'wagmi'
+import { useAccount } from 'wagmi'
+
+import CustomConnectButton from '../CustomConnectButton'
+import ConnectedHome from '../ConnectedHome'
 
 // localhost/api/posts/0x123 -> returna posts do 0x123
 // assinar msg -> decoficaiar msg pra pegar endereço (0x456)
@@ -10,58 +11,22 @@ import { useAccount, useReadContract, useSignMessage } from 'wagmi'
 // localhost/api/posts -> return 0x456
 
 export default function MainPanel() {
-    const { address } = useAccount()
-    const { signMessageAsync } = useSignMessage()
+    const { address, isConnecting, isReconnecting } = useAccount() // address -> conectado | !address -> nao conectado | loading->
 
-    async function signMessage() {
-        try {
-            if (!address) return
+    const loading = isConnecting || isReconnecting
 
-            const signedMessage = await signMessageAsync({
-                message: MESSAGE_TO_BE_SIGNED,
-            })
-
-            console.log('signedMessage', signedMessage)
-
-            const isSignedByAddress = await verifyMessage({
-                message: MESSAGE_TO_BE_SIGNED,
-                signature: signedMessage,
-                address,
-            })
-
-            const posts = await fetch('/api/posts', {
-                method: 'POST',
-                body: JSON.stringify({
-                    address: address,
-                    signature: signedMessage,
-                }),
-            })
-
-            console.log('posts', posts)
-
-            console.log('isSignedByAddress', isSignedByAddress)
-        } catch (err) {
-            console.error(err)
-            // @TODO: handle error
-        }
+    if (!address) {
+        return (
+            <div>
+                <h1>Conecte-se para acessar o forum</h1>
+                <CustomConnectButton />
+            </div>
+        )
     }
 
-    const { data } = useReadContract({
-        abi: erc20Abi,
-        address: W3CTOKEN_ADDRESS,
-        functionName: 'balanceOf',
-        args: [address as Address],
-    })
+    if (loading) {
+        return <div>Conectando...</div>
+    }
 
-    // console.log('blockNumber', blockNumber)
-
-    return (
-        <div>
-            <h1>Web3Comunities</h1>
-            <p>A Gated Web3 Community</p>
-            <p>O seu balanço é: {formatUnits(data || BigInt(0), 18)} </p>
-
-            <button onClick={signMessage}>Assinar</button>
-        </div>
-    )
+    return <ConnectedHome address={address} />
 }
