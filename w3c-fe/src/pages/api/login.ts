@@ -18,7 +18,7 @@ export default async function handler(
 ) {
     if (req.method === 'POST') {
         // receber um assinatura e address
-        const { address, signature } = JSON.parse(req.body)
+        const { address, signature } = req.body
 
         if (!address || !signature) {
             return res.status(400).json({ error: 'Request invalido' })
@@ -56,9 +56,17 @@ export default async function handler(
         //checar balance > 0
 
         const token = jwt.sign({ address }, process.env.SECRET || '', {
-            expiresIn: '1h',
+            expiresIn: '4h',
         })
 
-        return res.status(200).json({ token })
+        const refreshToken = jwt.sign(
+            { address, type: 'refresh' },
+            process.env.SECRET || '',
+            {
+                expiresIn: '12h',
+            },
+        )
+
+        return res.status(200).json({ token, refreshToken })
     }
 }

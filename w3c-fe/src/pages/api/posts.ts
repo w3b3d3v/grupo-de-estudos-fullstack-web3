@@ -56,23 +56,43 @@ export default async function handler(
             })
         }
 
-        const decodedToken = jwt.verify(
-            token,
-            process.env.SECRET || '',
-        ) as jwt.JwtPayload
-        console.log('decodedToken', decodedToken)
+        try {
+            const decodedToken = jwt.verify(
+                token,
+                process.env.SECRET || '',
+            ) as jwt.JwtPayload
+            console.log('decodedToken', decodedToken)
 
-        const { address } = decodedToken
+            const { address } = decodedToken
 
-        // const { signature } = JSON.parse(req.body)
+            // const { signature } = JSON.parse(req.body)
 
-        if (!address) {
-            res.status(400).json({
+            if (!address) {
+                res.status(400).json({
+                    posts: [],
+                    error: 'Missing address',
+                })
+            }
+
+            res.status(200).json({ posts: MOCK_POSTS, error: null })
+        } catch (error: unknown) {
+            if (error instanceof jwt.TokenExpiredError) {
+                return res.status(401).json({
+                    posts: [],
+                    error: 'Token expired',
+                })
+            } else if (error instanceof jwt.JsonWebTokenError) {
+                return res.status(401).json({
+                    posts: [],
+                    error: 'Invalid token',
+                })
+            }
+
+            // Handle any other unexpected errors
+            return res.status(500).json({
                 posts: [],
-                error: 'Missing address',
+                error: 'Internal server error',
             })
         }
-
-        res.status(200).json({ posts: MOCK_POSTS, error: null })
     }
 }

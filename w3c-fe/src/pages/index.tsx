@@ -1,7 +1,7 @@
 import Head from 'next/head'
 
 import dynamic from 'next/dynamic'
-import CustomConnectButton from '@/components/CustomConnectButton'
+import Header from '@/components/Header'
 
 const MainPanel = dynamic(() => import('@/components/MainPanel'), {
     ssr: false,
@@ -21,7 +21,7 @@ export default function Home() {
             </Head>
 
             <div>
-                <CustomConnectButton />
+                <Header />
                 <MainPanel />
             </div>
         </>

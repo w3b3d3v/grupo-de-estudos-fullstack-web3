@@ -1,10 +1,7 @@
-import { WEB3DEV_TOKEN_ABI } from '@/ABI/Web3DevTokenABI'
-import { W3CTOKEN_ADDRESS } from '@/constants'
-import React, { useState } from 'react'
+import React, { useMemo } from 'react'
 import { Address, isAddress } from 'viem'
-import { useWriteContract } from 'wagmi'
-import { waitForTransactionReceipt } from '@wagmi/core'
-import { config } from '@/providers/RainbowKit'
+
+import { useInvite } from '@/hooks'
 
 const MAX_ETH_ADDRESS_LENGTH = 42
 
@@ -21,6 +18,15 @@ export default function InvitePanel({ address }: InvitePanelProps) {
         handleInvitedAddressChange,
         handleInvite,
     } = useInvite()
+
+    const buttonText = useMemo(() => {
+        if (inviteTxnState === 'WAITING_SIGNATURE')
+            return 'Confirme a transação na carteira'
+        if (inviteTxnState === 'WAITING_TXN_RECEIPT')
+            return 'Aguardando a confirmação da transação'
+
+        return 'Convidar'
+    }, [inviteTxnState])
 
     const isTryingToInviteItself =
         invitedAddress.toLowerCase() === address.toLowerCase()
@@ -46,7 +52,7 @@ export default function InvitePanel({ address }: InvitePanelProps) {
                 <p>Você não pode convidar o seu endereço</p>
             )}
             {inviteTxnState === 'WAITING_TXN_RECEIPT' && (
-                <p>Aguarde a confirmação da transação</p>
+                <p>loading.... Aguarde a confirmação da transação</p>
             )}
             <button
                 onClick={handleInvite}
@@ -56,73 +62,8 @@ export default function InvitePanel({ address }: InvitePanelProps) {
                     DISABLED_STATES.includes(inviteTxnState)
                 }
             >
-                Convidar
+                {buttonText}
             </button>
         </div>
     )
-}
-
-// STATES: IDLE | WAITING_SIGNATURE | ERROR | WAITING_TXN_RECEIPT  | TXN_SUCCESFULL
-
-type InviteTxnState =
-    | 'IDLE'
-    | 'WAITING_SIGNATURE'
-    | 'ERROR'
-    | 'WAITING_TXN_RECEIPT'
-// | 'TXN_SUCCESFULL'
-
-function useInvite() {
-    const [inviteTxnState, setInviteTxnState] = useState<InviteTxnState>('IDLE')
-    const [invitedAddress, setInvitedAddress] = useState('')
-    const { writeContractAsync } = useWriteContract()
-
-    const handleInvitedAddressChange = (value: string) => {
-        const regex = new RegExp(/^[a-zA-Z0-9]*$/)
-        const isNextValueValid = regex.test(value)
-
-        if (!isNextValueValid) return
-
-        setInvitedAddress(value)
-    }
-
-    const handleInvite = async () => {
-        try {
-            setInviteTxnState('WAITING_SIGNATURE')
-            const txnHash = await writeContractAsync({
-                address: W3CTOKEN_ADDRESS,
-                abi: WEB3DEV_TOKEN_ABI,
-                functionName: 'invite',
-                args: [invitedAddress as Address],
-            })
-
-            setInviteTxnState('WAITING_TXN_RECEIPT')
-
-            await new Promise((resolve) => setTimeout(resolve, 5000))
-
-            const txnReceipt = await waitForTransactionReceipt(config, {
-                hash: txnHash,
-            })
-
-            if (txnReceipt.status === 'reverted') {
-                console.log('logs', txnReceipt.logs)
-                throw Error('Transaction reverted')
-            }
-
-            setInvitedAddress('')
-            setInviteTxnState('IDLE')
-            alert('Convite enviado com sucesso')
-
-            console.log('txnHash', txnHash)
-        } catch (err: any) {
-            setInviteTxnState('ERROR')
-            console.error('err', err)
-        }
-    }
-
-    return {
-        inviteTxnState,
-        invitedAddress,
-        handleInvitedAddressChange,
-        handleInvite,
-    }
 }
