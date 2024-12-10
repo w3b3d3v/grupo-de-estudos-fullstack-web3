@@ -50,6 +50,13 @@ export default function useWeb3Token({ address }: { address: Address }) {
             args: [address as Address],
         })
 
+    const { data: name } = useReadContract({
+        abi: WEB3DEV_TOKEN_ABI,
+        address: W3CTOKEN_ADDRESS,
+        functionName: 'name',
+        args: [],
+    })
+
     useEffect(() => {
         queryClient.invalidateQueries({ queryKey })
         queryClient.invalidateQueries({ queryKey: inviteCountQueryKey })
@@ -59,5 +66,6 @@ export default function useWeb3Token({ address }: { address: Address }) {
         balanceOf: balanceOf,
         inviteCount: inviteCount,
         error: error,
+        name,
     }
 }

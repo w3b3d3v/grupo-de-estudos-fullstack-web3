@@ -20,7 +20,10 @@ export default function useInvite() {
     const [invitedAddress, setInvitedAddress] = useState('')
     const { writeContractAsync } = useWriteContract()
 
-    const handleInvitedAddressChange = (value: string) => {
+    const handleInvitedAddressChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const value = event.target.value
         const regex = new RegExp(/^[a-zA-Z0-9]*$/)
         const isNextValueValid = regex.test(value)
 
@@ -54,12 +57,15 @@ export default function useInvite() {
 
             setInvitedAddress('')
             setInviteTxnState('IDLE')
-            toast('Convite enviado com sucesso', { type: 'success' })
+            toast(
+                `Convite enviado com sucesso. Txh hash: ${txnReceipt.transactionHash}`,
+                { type: 'success' },
+            )
 
             console.log('txnHash', txnHash)
         } catch (err: any) {
             setInviteTxnState('ERROR')
-            toast(`Erro ao enviar convite ${err?.message}`, { type: 'error' })
+            toast(`Erro ao enviar convite `, { type: 'error' })
             console.error('err', err)
         }
     }

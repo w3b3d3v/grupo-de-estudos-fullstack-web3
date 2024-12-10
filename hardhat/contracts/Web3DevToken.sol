@@ -3,10 +3,12 @@
 pragma solidity >0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Web3DevToken is ERC20 {
     uint256 inviteAmount = 1 * 10 ** decimals();
     uint256 constant MAX_INVITES = 3;
+    // address owner;
 
     mapping(address => uint256) private inviteCount;
 
@@ -31,4 +33,10 @@ contract Web3DevToken is ERC20 {
     function transfer(address, uint256) public pure override returns (bool) {
         revert("Transfers are disabled");
     }
+
+    function unvite(address addr) public {
+        // require(msg.sender == owner, "Only owner can uninvite");
+        // _burnFrom(addr, inviteAmount);
+    }
+
 }

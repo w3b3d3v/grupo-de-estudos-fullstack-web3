@@ -2,6 +2,7 @@ import Head from 'next/head'
 
 import dynamic from 'next/dynamic'
 import Header from '@/components/Header'
+import { Box } from '@chakra-ui/react'
 
 const MainPanel = dynamic(() => import('@/components/MainPanel'), {
     ssr: false,
@@ -20,10 +21,10 @@ export default function Home() {
                 <link rel='icon' href='/favicon.ico' />
             </Head>
 
-            <div>
+            <Box minHeight='100vh' bgColor='gray.800' color='white'>
                 <Header />
                 <MainPanel />
-            </div>
+            </Box>
         </>
     )
 }

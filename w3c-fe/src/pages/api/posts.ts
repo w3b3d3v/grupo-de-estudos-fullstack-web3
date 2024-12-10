@@ -65,8 +65,6 @@ export default async function handler(
 
             const { address } = decodedToken
 
-            // const { signature } = JSON.parse(req.body)
-
             if (!address) {
                 res.status(400).json({
                     posts: [],

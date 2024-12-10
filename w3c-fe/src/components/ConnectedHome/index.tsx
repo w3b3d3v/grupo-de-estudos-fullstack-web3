@@ -3,6 +3,7 @@ import { Address, formatUnits } from 'viem'
 
 import InvitePanel from '../InvitePanel'
 import { useAuth, usePosts, useWeb3Token } from '@/hooks'
+import { Box, Button, Flex, Heading } from '@chakra-ui/react'
 
 type ConnectedHomeProps = {
     address: Address
@@ -10,52 +11,107 @@ type ConnectedHomeProps = {
 
 export default function ConnectedHome({ address }: ConnectedHomeProps) {
     const { authenticated, login } = useAuth()
-    const { balanceOf, inviteCount } = useWeb3Token({ address })
+    const { balanceOf, inviteCount, name } = useWeb3Token({ address })
     const { posts } = usePosts({ address, authenticated })
 
     return (
-        <div>
-            <h1>Web3Comunities</h1>
-            <p>A Gated Web3 Community</p>
-            <p>Endereço: {address}</p>
-            <p>O seu balanço é: {formatUnits(balanceOf || BigInt(0), 18)} </p>
-            <p>Você já convidou: {inviteCount?.toString() || 0} </p>
+        <Flex p='8' align='center' flexDirection='column' gap={8}>
+            <Heading as='h3' size='lg' color='teal.300'>
+                Bem vindo
+            </Heading>
+            <Flex
+                border='1px solid'
+                borderColor={'teal.300'}
+                flexDirection='column'
+                p={5}
+                borderRadius={4}
+                gap={2}
+            >
+                <p>
+                    <strong>Endereço</strong> {address}
+                </p>
+                <p>
+                    <strong>Balanço</strong>{' '}
+                    {formatUnits(balanceOf || BigInt(0), 18)} {name}
+                </p>
+                <p>
+                    <strong>Convites</strong> {inviteCount?.toString() || 0}{' '}
+                </p>
+                {authenticated && (
+                    <Flex justify='center' p={4}>
+                        <InvitePanel address={address} />
+                    </Flex>
+                )}
+            </Flex>
 
             {balanceOf && balanceOf > 0 ? (
-                <div>
+                <Box>
                     {!authenticated ? (
-                        <div>
-                            <h2>
+                        <Flex flexDirection='column' gap={5} align='center'>
+                            <Heading as='h2' size='md' textAlign='center'>
                                 Faça sua autenticação para ver seus posts
                                 exclusivos e convidar novos usários
-                            </h2>
-                            <button onClick={login}>Autenticar</button>
-                        </div>
+                            </Heading>
+                            <Button
+                                colorScheme='teal'
+                                onClick={login}
+                                maxW='10rem'
+                            >
+                                Autenticar
+                            </Button>
+                        </Flex>
                     ) : (
-                        <div>
-                            <div>Olá, {address}</div>
-                            <InvitePanel address={address} />
-
-                            {posts.length === 0 ? (
-                                <div>
-                                    <h2> Nenhum post disponivel</h2>
-                                </div>
-                            ) : (
-                                posts.map((post) => (
-                                    <div key={post.id}>
-                                        <h2>{post.title}</h2>
-                                        <p>{post.description}</p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                        <Box>
+                            <Flex flexDirection='column' align='center' p={4}>
+                                {posts.length === 0 ? (
+                                    <Box>
+                                        <Heading as='p' size='mg'>
+                                            Nenhum post disponivel
+                                        </Heading>
+                                    </Box>
+                                ) : (
+                                    <Flex flexDirection='column' gap={8}>
+                                        <Heading
+                                            as='h1'
+                                            size='lg'
+                                            color='teal.300'
+                                            textAlign='center'
+                                        >
+                                            Posts exclusivos para você
+                                        </Heading>
+                                        {posts.map((post) => (
+                                            <Flex
+                                                flexDir='column'
+                                                key={post.id}
+                                                gap={1}
+                                            >
+                                                <Heading as='h5' size='md'>
+                                                    {post.title}
+                                                </Heading>
+                                                <p>{post.description}</p>
+                                                <Button
+                                                    colorScheme='teal'
+                                                    size='xs'
+                                                    width='5rem'
+                                                >
+                                                    Ver mais
+                                                </Button>
+                                            </Flex>
+                                        ))}
+                                    </Flex>
+                                )}
+                            </Flex>
+                        </Box>
                     )}
-                </div>
+                </Box>
             ) : (
-                <div>
-                    <h3>Você precisa ser convidado do fórum</h3>
-                </div>
+                <Box>
+                    <Heading size='md'>
+                        Você precisa ser convidado do fórum para acessar os
+                        posts
+                    </Heading>
+                </Box>
             )}
-        </div>
+        </Flex>
     )
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { Flex, Heading } from '@chakra-ui/react'
 import { useAccount } from 'wagmi'
 
 import ConnectedHome from '../ConnectedHome'
@@ -11,14 +11,20 @@ export default function MainPanel() {
 
     if (!address) {
         return (
-            <div>
-                <h1>Conecte-se para acessar o forum</h1>
-            </div>
+            <Flex justifyContent='center' p='8'>
+                <Heading as='h3' size='lg'>
+                    Conecte-se sua carteira para acessar a Web3 Communities
+                </Heading>
+            </Flex>
         )
     }
 
     if (loading) {
-        return <div>Conectando...</div>
+        return (
+            <Flex justifyContent='center' p='8'>
+                Conectando...
+            </Flex>
+        )
     }
 
     return <ConnectedHome address={address} />

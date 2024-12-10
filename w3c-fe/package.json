@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.10.4",
+    "@emotion/react": "^11.14.0",
     "@rainbow-me/rainbowkit": "^2.1.7",
     "@tanstack/react-query": "^5.59.0",
     "axios": "^1.7.7",
